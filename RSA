@@ -1,0 +1,45 @@
+# Function to find the greatest common divisor (GCD)
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+
+# Function to find the modular inverse of e under modulo phi
+def mod_inverse(e, phi):
+    original_phi = phi
+    x0, x1 = 0, 1
+    while e > 1:
+        quotient = e // phi
+        phi, e = e % phi, phi
+        x0, x1 = x1 - quotient * x0, x0
+    if x1 < 0:
+        x1 += original_phi
+    return x1
+
+# Step 1: Define p and q, calculate n and phi
+p = 5
+q = 11
+n = p * q  # n = 55
+phi = (p - 1) * (q - 1)  # phi = (5 - 1) * (11 - 1) = 4 * 10 = 40
+
+# Step 2: Choose e such that 1 < e < phi and gcd(e, phi) = 1
+e = 3
+while e < phi:
+    if gcd(e, phi) == 1:
+        break
+    e += 1
+
+# Step 3: Calculate the modular inverse of e, which is d
+d = mod_inverse(e, phi)
+
+# Message to be encrypted
+msg = 8
+print("Message data = ", msg)
+
+# Step 4: Encrypt the message using the formula c = (msg ^ e) % n
+c = pow(msg, e, n)
+print("Encrypted data = ", c)
+
+# Step 5: Decrypt the message using the formula m = (c ^ d) % n
+m = pow(c, d, n)
+print("Original Message Sent = ", m)
