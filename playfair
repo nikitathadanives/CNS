@@ -1,0 +1,81 @@
+def create_playfair_square(key):
+    # Create a 5x5 key square with the provided key.
+    key = key.upper().replace('J', 'I')  # Combine I and J
+    seen = set()
+    square = []
+
+    # Add key letters to the square, ignoring duplicates.
+    for char in key:
+        if char not in seen and char.isalpha():
+            seen.add(char)
+            square.append(char)
+
+    # Add the rest of the alphabet.
+    for char in 'ABCDEFGHIKLMNOPQRSTUVWXYZ':
+        if char not in seen:
+            seen.add(char)
+            square.append(char)
+
+    # Create a 5x5 matrix.
+    return [square[i:i + 5] for i in range(0, 25, 5)]
+
+def find_position(square, char):
+    # Find the position of a character in the key square.
+    for row in range(5):
+        for col in range(5):
+            if square[row][col] == char:
+                return row, col
+    return None
+
+def encrypt_pair(pair, square):
+    # Encrypt a pair of characters using the Playfair cipher rules.
+    row1, col1 = find_position(square, pair[0])
+    row2, col2 = find_position(square, pair[1])
+
+    if row1 == row2:
+        # Same row: shift right
+        return square[row1][(col1 + 1) % 5] + square[row2][(col2 + 1) % 5]
+    elif col1 == col2:
+        # Same column: shift down
+        return square[(row1 + 1) % 5][col1] + square[(row2 + 1) % 5][col2]
+    else:
+        # Rectangle: swap columns
+        return square[row1][col2] + square[row2][col1]
+
+def prepare_text(text):
+    # Prepare text by removing spaces, converting to uppercase, and splitting into pairs.
+    text = text.upper().replace('J', 'I').replace(' ', '')
+    pairs = []
+
+    i = 0
+    while i < len(text):
+        pair = text[i]
+
+        # If a pair is the same (like "LL"), insert an "X".
+        if i + 1 < len(text):
+            if text[i] == text[i + 1]:
+                pair += 'X'
+            else:
+                pair += text[i + 1]
+                i += 1
+        else:
+            # Add 'X' if there is an odd number of characters.
+            pair += 'X'
+
+        pairs.append(pair)
+        i += 1
+
+    return pairs
+
+def encrypt_playfair(text, key):
+    # Encrypt the provided text using the Playfair cipher.
+    square = create_playfair_square(key)
+    pairs = prepare_text(text)
+    encrypted_text = ''.join([encrypt_pair(pair, square) for pair in pairs])
+    return encrypted_text
+
+# Example usage:
+key = "October"
+text = "nikita"
+encrypted = encrypt_playfair(text, key)
+print(f"Encrypted text: {encrypted}")
